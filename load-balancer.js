@@ -9,9 +9,9 @@ const PORT = 3000;
 const ALGORITHM = process.env.ALGORITHM || 'round-robin';
 
 const servers = [
-    { host: 'localhost', port: 3001, isAlive: false },
-    { host: 'localhost', port: 3002, isAlive: false },
-    { host: 'localhost', port: 3003, isAlive: false }
+    { host: 'localhost', port: 3001, isAlive: false, requests: 0 },
+    { host: 'localhost', port: 3002, isAlive: false, requests: 0 },
+    { host: 'localhost', port: 3003, isAlive: false, requests: 0 }
 ];
 
 let currentIndex = 0;
@@ -97,7 +97,16 @@ function selectServer(req) {
         return server;
     }
 }
-
+app.get('/stats', (req, res) => {
+    res.json({
+        algoritmo: ALGORITHM,
+        servidores: servers.map(server => ({
+            porta: server.port,
+            status: server.isAlive ? 'ONLINE' : 'OFFLINE',
+            requisicoes: server.requests
+        }))
+    });
+});
 // Encaminha as requisições
 app.use((req, res) => {
     let server;
@@ -112,6 +121,8 @@ app.use((req, res) => {
     if (!server) {
         return res.status(503).send('Nenhum servidor disponível no momento.');
     }
+
+    server.requests++;
 
     console.log(`Algoritmo: ${ALGORITHM}`);
     console.log(`Encaminhando para: ${server.port}`);
