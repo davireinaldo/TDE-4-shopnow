@@ -3,6 +3,13 @@ const express = require('express');
 
 const app = express();
 
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'online',
+        server: 'Servidor 2'
+    });
+});
+
 const PORT = 3002;
 
 app.get('/', (req, res) => {
